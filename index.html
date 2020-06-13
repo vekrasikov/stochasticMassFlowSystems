@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Имитация СМО</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+            integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="system/Functions.js"></script>
+    <script src="system/generators/Exponential.js"></script>
+    <script src="system/generators/Poisson.js"></script>
+    <script src="system/generators/Normal.js"></script>
+    <script src="system/Model.js"></script>
+</head>
+<body id="show_bg_3">
+<header class="container-fluid">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col mb-4 pt-2 mt-2 ml-1">
+        Система массового обслуживания с <select id="distLawLB" onchange="selectDistribution(this)"
+                                                 class="dropDownList" style="width: 350px">
+        <option value="Нормальное распределение">нормальным законом распределения</option>
+        <option value="Распределение Пуассона">законом распределения Пуассона</option>
+        <option value="Экспоненциальное распределение">экспоненциальным законом распределения</option>
+    </select> времени между поступлением заявок и просмотра динамики обработки очередей заявок
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid mt-4 md-4">
+        <div class="row">
+            <div class="col a1 label" id="systemInfo">Время работы с заявоками системы массового обслуживания:</div>
+        </div>
+        <div class="row">
+            <div class="col-xl-1 a2">
+                <progress value="1" max="100" class="progressBar" id="totalProgress" style="position: relative"></progress>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col a1 label"><h4><span class="badge badge-pill badge-info"><b>Состояние каналов:</b></span></h4></div>
+        </div>
+        <div class="row">
+            <div class="col-xl-1 a2"><div id="barsStates"></div></div>
+        </div>
+        <div class="row">
+            <div class="col a1 label"><h4><span class="badge badge-pill badge-info"><b>Сведение по моделируемой СМО</b></span></h4></div>
+        </div>
+        <div class="row md-5 pd-5">
+            <div class="col-md-4 a1 label" id="details"/>
+        </div>
+    </div>
+</header>
+<main class="container-fluid mt-4">
+    <section class="buttons mb-4">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-2 c1">
+                    <input type="button" class="btn btn-success" style="width: 100%" value="Запустить" onclick="start()"/>
+                </div>
+                <div class="col-xl-2 c2 resumeButton" style="display: none">
+                    <input type="button" class="btn btn-primary" style="width: 100%" value="Возобновить" onclick="resume()"/>
+                </div>
+                <div class="col-xl-2 c3 pauseButton" style="display: none">
+                    <input type="button" class="btn btn-secondary" style="width: 100%" value="Приостановить" onclick="pause()"/>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="common mb-4">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-md-6 col-xl-2 a1 mb-2 pb-2">
+                    <label for="nTB">Каналов:</label>
+                    <input type="number" id="nTB" value="2" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a2 mb-2 pb-2">
+                    <label for="mTB">Длина очереди:</label>
+                    <input type="number" id="mTB" value="4" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a3 mb-2 pb-2">
+                    <label for="timeTB">Время работы:</label>
+                    <input type="number" id="timeTB" value="20" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a4">
+                    <label for="dtTB">Шаг по времени:</label>
+                    <input type="number" id="dtTB" value="0.001" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a5 NormalDistributionSP">
+                    <label for="muDistTB">Математическое ожидание:</label>
+                    <input type="number" id="muDistTB" value="0.5" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a6 NormalDistributionSP">
+                    <label for="sigmaDistTB">Среднеквадратическое отклонение:</label>
+                    <input type="number" id="sigmaDistTB" value="0.2" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a7 PoissonDistributionSP" style="display: none">
+                    <label for="lambdaDistTB">Математическое ожидание:</label>
+                    <input type="number" id="lambdaDistTB" value="1" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a8">
+                    <label for="delayTB">Задержка (миллисекунды):</label>
+                    <input type="number" id="delayTB" value="10" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a9">
+                    <label for="lambdaTB">Интенсивность обработки заявок:</label>
+                    <input type="number" id="lambdaTB" value="0.8" class="form-control"/>
+                </div>
+                <div class="col-md-6 col-xl-2 a10">
+                    <label for="muTB">Интенсивность обсуживания:</label>
+                    <input type="number" id="muTB" value="2" class="form-control"/>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
