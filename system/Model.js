@@ -63,7 +63,7 @@ class Model {
     /// Получение времени обработки очередной заявки
     GetProcessTime() {
         let r = this.generator.NextDouble();
-        return Math.abs(r) / this.processRate;
+        return -Math.log(1-r) / this.processRate;
     }
 
     sleep(ms) {

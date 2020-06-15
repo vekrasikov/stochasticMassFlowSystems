@@ -14,7 +14,9 @@ class ExponentialGenerator {
     }
 
     NextDouble() {
-        return 1 - Math.pow(Math.E, -this.lambda * Math.random() * 6);
+        let x = 0 ;
+        while(x === 0) x = Math.random(); //Converting [0,1) to (0,1)
+        return 1 - Math.pow(Math.E, -this.lambda * x * 6);
     }
 }
 
